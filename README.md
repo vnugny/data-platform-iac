@@ -4,28 +4,27 @@ Infrastructure-as-Code for the data platform. Provisions a full local dev enviro
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Local Dev (Docker Compose)           │
-│                                                             │
-│   ┌──────────┐    ┌──────────┐    ┌──────────┐             │
-│   │ Airflow  │───▶│  Spark   │───▶│  MinIO   │             │
-│   │ (8080)   │    │ (8090)   │    │  (9000)  │             │
-│   └──────────┘    └──────────┘    └──────────┘             │
-│         │                              │                    │
-│   ┌──────────┐                  ┌──────────────────┐       │
-│   │ Postgres │                  │ bronze/silver/   │       │
-│   │ (meta DB)│                  │ gold/checkpoints │       │
-│   └──────────┘                  └──────────────────┘       │
-└─────────────────────────────────────────────────────────────┘
+### Local Dev (Docker Compose)
 
-┌─────────────────────────────────────────────────────────────┐
-│                     Cloud (AWS Terraform)                   │
-│                                                             │
-│   MSK (Kafka) ──▶ MWAA/Airflow ──▶ EMR/Spark ──▶ S3       │
-│                                          │                  │
-│                                    Redshift (warehouse)     │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    A[Airflow\n:8080] -->|submits jobs| B[Spark\n:8090]
+    B -->|reads/writes| C[MinIO\n:9000]
+    A -->|metadata| D[(Postgres)]
+    C --> E[bronze]
+    C --> F[silver]
+    C --> G[gold]
+    C --> H[checkpoints]
+```
+
+### Cloud (AWS Terraform)
+
+```mermaid
+graph LR
+    K[MSK\nKafka] --> A[MWAA\nAirflow]
+    A -->|orchestrates| E[EMR\nSpark]
+    E -->|writes| S[S3\nLakehouse]
+    S -->|COPY| R[Redshift\nWarehouse]
 ```
 
 ## Quick Start (local)
