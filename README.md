@@ -1,5 +1,7 @@
 # data-platform-iac
 
+[![CI](https://github.com/vnugny/data-platform-iac/actions/workflows/ci.yml/badge.svg)](https://github.com/vnugny/data-platform-iac/actions/workflows/ci.yml)
+
 Infrastructure-as-Code for the data platform. Provisions a full local dev environment with Docker Compose and a production-grade cloud stack on AWS with Terraform.
 
 ## Architecture
@@ -8,8 +10,8 @@ Infrastructure-as-Code for the data platform. Provisions a full local dev enviro
 
 ```mermaid
 graph LR
-    A[Airflow\n:8080] -->|submits jobs| B[Spark\n:8090]
-    B -->|reads/writes| C[MinIO\n:9000]
+    A[Airflow<br/>:8080] -->|submits jobs| B[Spark<br/>:8090]
+    B -->|reads/writes| C[MinIO<br/>:9000]
     A -->|metadata| D[(Postgres)]
     C --> E[bronze]
     C --> F[silver]
@@ -19,12 +21,16 @@ graph LR
 
 ### Cloud (AWS Terraform)
 
+The Terraform modules provision exactly these resources — Kafka (MSK), the Airflow
+metadata database (RDS Postgres), the lakehouse object store (S3), and the warehouse
+(Redshift). Spark compute is expected to run on the cluster of your choice and is not
+provisioned by a module here.
+
 ```mermaid
 graph LR
-    K[MSK\nKafka] --> A[MWAA\nAirflow]
-    A -->|orchestrates| E[EMR\nSpark]
-    E -->|writes| S[S3\nLakehouse]
-    S -->|COPY| R[Redshift\nWarehouse]
+    K[MSK<br/>Kafka] --> A[Airflow<br/>RDS Postgres metadata]
+    A -->|orchestrates jobs writing to| S[S3<br/>Lakehouse buckets]
+    S -->|COPY| R[Redshift<br/>Warehouse]
 ```
 
 ## Quick Start (local)
@@ -98,7 +104,12 @@ See [docs/decisions/](docs/decisions/) for ADRs.
 
 ## CI
 
-GitHub Actions runs on every PR:
-- Terraform `fmt` + `validate`
-- Docker image builds (cached)
-- Compose smoke test (MinIO + Postgres health checks)
+GitHub Actions validates and lints the definitions on every push and PR — it does not
+provision cloud resources or boot the full stack (see
+[ADR 002](docs/decisions/002-ci-validates-not-provisions.md)):
+- Terraform `fmt -check` + `validate` (against the dev environment, `-backend=false`)
+- `hadolint` on the Airflow and Spark Dockerfiles
+- `docker compose config` to validate the Compose file
+
+Building the images and booting the stack stays a local activity (`make up`), and cloud
+provisioning stays a deliberate `terraform apply`.
