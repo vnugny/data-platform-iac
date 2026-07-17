@@ -4,17 +4,17 @@ resource "aws_db_subnet_group" "airflow" {
 }
 
 resource "aws_db_instance" "airflow" {
-  identifier             = "${var.environment}-airflow-metadata"
-  engine                 = "postgres"
-  engine_version         = "15.6"
-  instance_class         = var.instance_class
-  allocated_storage      = 20
-  db_name                = "airflow"
-  username               = "airflow"
-  password               = var.db_password
-  db_subnet_group_name   = aws_db_subnet_group.airflow.name
-  skip_final_snapshot    = true
-  deletion_protection    = false
+  identifier           = "${var.environment}-airflow-metadata"
+  engine               = "postgres"
+  engine_version       = "15.6"
+  instance_class       = var.instance_class
+  allocated_storage    = 20
+  db_name              = "airflow"
+  username             = "airflow"
+  password             = var.db_password
+  db_subnet_group_name = aws_db_subnet_group.airflow.name
+  skip_final_snapshot  = true
+  deletion_protection  = false
 
   tags = {
     Environment = var.environment

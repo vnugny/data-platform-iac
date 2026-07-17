@@ -18,8 +18,8 @@ provider "aws" {
 }
 
 module "minio" {
-  source      = "../../modules/minio"
-  environment = "dev"
+  source       = "../../modules/minio"
+  environment  = "dev"
   bucket_names = ["bronze", "silver", "gold", "checkpoints"]
 }
 
@@ -42,11 +42,11 @@ module "airflow" {
 }
 
 module "warehouse" {
-  source        = "../../modules/warehouse"
-  environment   = "dev"
-  vpc_id        = var.vpc_id
-  subnet_ids    = var.subnet_ids
-  node_type     = "ra3.xlplus"
-  cluster_type  = "single-node"
-  db_password   = var.warehouse_db_password
+  source       = "../../modules/warehouse"
+  environment  = "dev"
+  vpc_id       = var.vpc_id
+  subnet_ids   = var.subnet_ids
+  node_type    = "ra3.xlplus"
+  cluster_type = "single-node"
+  db_password  = var.warehouse_db_password
 }

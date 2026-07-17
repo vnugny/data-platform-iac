@@ -21,6 +21,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bronze_expiry" {
   rule {
     id     = "expire-raw-after-90-days"
     status = "Enabled"
+    filter {} # apply to every object in the bucket
     expiration {
       days = 90
     }

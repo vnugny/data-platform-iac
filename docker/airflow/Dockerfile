@@ -1,6 +1,9 @@
 FROM apache/airflow:2.9.3-python3.11
 
 USER root
+# JDK apt version is intentionally unpinned — it tracks the Debian base image and
+# pinning it breaks on every upstream base bump for no security benefit here.
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
     openjdk-17-jdk-headless \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
